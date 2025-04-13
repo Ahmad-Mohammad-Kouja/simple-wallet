@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\App;
 
 class Balance extends Model
 {
@@ -40,5 +41,19 @@ class Balance extends Model
             ->latest()
             ->first()
             ?->amount ?? 0;
+    }
+
+    public function getByUserIdWithLock(int $userId): float
+    {
+        $balance = self::query()
+            ->where('user_id', $userId)
+            ->latest()
+            ->lockForUpdate()
+            ->first();
+
+        $transactionBalance = App::make(TransactionDetail::class)
+            ->getUserBalanceAfterTransactionId($userId, $balance?->transaction_id ?? null);
+
+        return $transactionBalance + $balance->amount;
     }
 }

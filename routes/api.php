@@ -17,4 +17,5 @@ Route::prefix('wallets')
     ->controller(WalletController::class)
     ->group(function () {
         Route::post('deposit', 'deposit')->name('deposit');
+        Route::post('withdraw', 'withdraw')->name('withdraw');
     });

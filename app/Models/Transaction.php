@@ -31,8 +31,8 @@ class Transaction extends Model
 
     public function getNextNumber(): int
     {
-        return $this->query()
+        return ($this->query()
             ->lockForUpdate()
-            ->max('number') ?? 0;
+            ->max('number') ?? 0) + 1;
     }
 }

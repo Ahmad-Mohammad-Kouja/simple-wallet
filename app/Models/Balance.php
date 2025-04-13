@@ -32,4 +32,13 @@ class Balance extends Model
     {
         return $this->belongsTo(Transaction::class);
     }
+
+    public function getByUserId(int $userId): float
+    {
+        return self::query()
+            ->where('user_id', $userId)
+            ->latest()
+            ->first()
+            ?->amount ?? 0;
+    }
 }

@@ -14,7 +14,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class StoreWithdrawTransactionAction
+class StoreTransferTransactionAction
 {
     public function __construct(
         protected User $user,
@@ -24,35 +24,49 @@ class StoreWithdrawTransactionAction
         protected OperationResult $operationResult
     ) {}
 
-    public function execute(int $userId, float $amount)
+    public function execute(int $sourceUserId, int $destinationUserId, float $amount)
     {
+        $users = $this->user->find([$sourceUserId, $destinationUserId]);
+        if ($users->count() !== 2) {
+            return $this->operationResult->markAsClientError(__('global.response_messages.user_not_found'));
+        }
+
         try {
             DB::beginTransaction();
 
-            $balance = $this->balance->getByUserIdWithLock($userId);
+            $balance = $this->balance->getByUserIdWithLock($sourceUserId);
             if ($balance - $amount < 0) {
                 DB::rollBack();
                 return $this->operationResult->markAsClientError(__('global.response_messages.no_enough_balance'));
             }
 
             $transaction = $this->transaction->create([
-                'type' => TransactionTypeEnum::WITHDRAW,
+                'type' => TransactionTypeEnum::TRANSFER,
                 'number' => $this->transaction->getNextNumber(),
             ]);
 
-            $this->transactionDetail->create([
+            $transactionDetailsData[] = [
                 'transaction_id' => $transaction->id,
-                'user_id' => $userId,
+                'user_id' => $sourceUserId,
                 'type' => TransactionDetailTypeEnum::WITHDRAW,
                 'amount' => $amount,
-            ]);
+            ];
+
+            $transactionDetailsData[] = [
+                'transaction_id' => $transaction->id,
+                'user_id' => $destinationUserId,
+                'type' => TransactionDetailTypeEnum::DEPOSIT,
+                'amount' => $amount,
+            ];
+
+            $this->transactionDetail->insert($transactionDetailsData);
             DB::commit();
 
             $this->operationResult->setData($transaction, 'transaction');
         } catch (Exception $exception) {
             DB::rollBack();
             dd($exception->getMessage());
-            Log::warning("error on store withdraw transaction for user: {$userId}, exception: {$exception->getMessage()}");
+            Log::warning("error on store transfer transaction for user: {$destinationUserId} from user {$sourceUserId}, exception: {$exception->getMessage()}");
             $this->operationResult->markAsInternalServerError($exception->getMessage());
         }
 

@@ -18,4 +18,5 @@ Route::prefix('wallets')
     ->group(function () {
         Route::post('deposit', 'deposit')->name('deposit');
         Route::post('withdraw', 'withdraw')->name('withdraw');
+        Route::post('transfer', 'transfer')->name('transfer');
     });

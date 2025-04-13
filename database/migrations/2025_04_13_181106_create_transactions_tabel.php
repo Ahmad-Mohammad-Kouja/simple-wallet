@@ -13,13 +13,8 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')
-                ->constrained()
-                ->noActionOnUpdate()
-                ->noActionOnDelete();
-
             $table->string('type', 20)->index();
-            $table->string('number', 10)->unique();
+            $table->integer('number')->unique();
             $table->string('note')->nullable();
             $table->timestamps();
         });

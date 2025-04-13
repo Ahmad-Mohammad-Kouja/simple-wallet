@@ -50,4 +50,12 @@ class StoreUserDTO
         $this->initialBalance = $request->float('initial_balance', 0);
         return $this;
     }
+
+    public function buildFromArray(array $data): self
+    {
+        $this->name = $data['name'];
+        $this->email = $data['email'];
+        $this->initialBalance = $data['initial_balance'] ?? 0;
+        return $this;
+    }
 }

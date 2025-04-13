@@ -19,6 +19,7 @@ return new class extends Migration
                 ->noActionOnDelete();
 
             $table->foreignId('transaction_id')
+                ->nullable()
                 ->constrained()
                 ->noActionOnUpdate()
                 ->noActionOnDelete();

@@ -20,6 +20,7 @@ return new class extends Migration
 
             $table->string('type', 20)->index();
             $table->string('number', 10)->unique();
+            $table->string('note')->nullable();
             $table->timestamps();
         });
     }

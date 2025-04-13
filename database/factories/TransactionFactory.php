@@ -19,7 +19,6 @@ class TransactionFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
             'type' => fake()->randomElement(TransactionTypeEnum::cases()),
             'number' => str(fake()->unique()->randomNumber(5))->padRight(8),
             'amount' => fake()->randomNumber(2),

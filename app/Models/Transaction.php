@@ -15,7 +15,6 @@ class Transaction extends Model
     protected $table = 'transactions';
 
     protected $fillable = [
-        'user_id',
         'type',
         'number',
         'note',
@@ -28,5 +27,12 @@ class Transaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getNextNumber(): int
+    {
+        return $this->query()
+            ->lockForUpdate()
+            ->max('number') ?? 0;
     }
 }

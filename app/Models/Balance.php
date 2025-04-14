@@ -36,11 +36,15 @@ class Balance extends Model
 
     public function getByUserId(int $userId): float
     {
-        return self::query()
+        $balance = self::query()
             ->where('user_id', $userId)
             ->latest()
-            ->first()
-            ?->amount ?? 0;
+            ->first();
+
+        $transactionBalance = App::make(TransactionDetail::class)
+            ->getUserBalanceAfterTransactionId($userId, $balance->transaction_id ?? null);
+
+        return $transactionBalance + $balance->amount;
     }
 
     public function getByUserIdWithLock(int $userId): float
